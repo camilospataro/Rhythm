@@ -1,6 +1,5 @@
 import { createClient, getUserId } from "@/lib/supabase/server";
 import Header from "@/components/layout/Header";
-import LogoutButton from "@/components/layout/LogoutButton";
 import TaskListClient from "./TaskListClient";
 
 export default async function TasksPage() {
@@ -24,7 +23,7 @@ export default async function TasksPage() {
 
   return (
     <div>
-      <Header title="Task Manager" action={<LogoutButton />} />
+      <Header title="Task Manager" />
       <TaskListClient tasks={tasks || []} templates={templates || []} />
     </div>
   );

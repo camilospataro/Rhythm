@@ -21,7 +21,8 @@
       "Bash(ls -la \"c:\\\\Users\\\\lenovo\\\\Documents\\\\app\\\\Rhythm\\\\src\\\\app\\\\\\(app\\)\")",
       "Bash(ls -la \"c:\\\\Users\\\\lenovo\\\\Documents\\\\app\\\\Rhythm\\\\src\\\\app\\\\\\(auth\\)\\\\login\")",
       "Bash(ls -la \"c:\\\\Users\\\\lenovo\\\\Documents\\\\app\\\\Rhythm\\\\src\\\\app\\\\\\(auth\\)\\\\signup\")",
-      "Bash(gh auth status)"
+      "Bash(gh auth status)",
+      "Bash(find \"/c/Users/lenovo/Documents/app/Rhythm/src/app/\\(app\\)\" -type d)"
     ]
   }
 }

@@ -11,6 +11,8 @@ import { addDayTask, removeDayTask } from "@/actions/dayTasks";
 import { formatDate, formatDisplayDate } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { addDays } from "date-fns";
+import Link from "next/link";
+import LogoutButton from "@/components/layout/LogoutButton";
 
 interface TaskOption {
   id: string;
@@ -70,30 +72,43 @@ export default function DayClient({ tasks, date, displayDate, completedCount, al
     <div>
       {/* Date Navigation */}
       <div className="bg-surface glass border-b border-border shadow-[var(--glass-shadow)]">
-        <div className="flex items-center justify-between h-14 max-w-lg mx-auto px-4">
-          <Button variant="ghost" size="sm" onClick={() => goToDate(-1)}>
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-            </svg>
-          </Button>
-          <button
-            onClick={() => router.push("/day")}
-            className={cn(
-              "text-center px-4 py-1 rounded-lg transition-colors flex flex-col items-center justify-center",
-              isToday && "bg-primary text-white"
-            )}
-          >
-            <p className={cn("text-xs font-semibold", isToday ? "visible" : "invisible")}>Today</p>
-            <p className="text-sm font-semibold">{shownDisplayDate}</p>
-            <p className={cn("text-xs", isToday ? "text-white/70" : "text-muted")}>
-              {isPending ? "..." : `${completedCount}/${tasks.length} done`}
-            </p>
-          </button>
-          <Button variant="ghost" size="sm" onClick={() => goToDate(1)}>
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-            </svg>
-          </Button>
+        <div className="flex items-center h-14 max-w-lg mx-auto px-4">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <LogoutButton />
+            <Link
+              href="/guide"
+              className="w-7 h-7 rounded-full border border-border bg-surface-hover flex items-center justify-center text-muted hover:text-primary hover:border-primary/30 transition-colors"
+              title="Help & Guide"
+            >
+              <span className="text-xs font-semibold">?</span>
+            </Link>
+          </div>
+          <div className="flex-1 flex items-center justify-center gap-1">
+            <Button variant="ghost" size="sm" onClick={() => goToDate(-1)}>
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+              </svg>
+            </Button>
+            <button
+              onClick={() => router.push("/day")}
+              className={cn(
+                "text-center px-4 py-1 rounded-lg transition-colors flex flex-col items-center justify-center",
+                isToday && "bg-primary text-white"
+              )}
+            >
+              <p className={cn("text-xs font-semibold", isToday ? "visible" : "invisible")}>Today</p>
+              <p className="text-sm font-semibold">{shownDisplayDate}</p>
+              <p className={cn("text-xs", isToday ? "text-white/70" : "text-muted")}>
+                {isPending ? "..." : `${completedCount}/${tasks.length} done`}
+              </p>
+            </button>
+            <Button variant="ghost" size="sm" onClick={() => goToDate(1)}>
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+              </svg>
+            </Button>
+          </div>
+          <div className="w-[4.25rem] flex-shrink-0" />
         </div>
       </div>
 

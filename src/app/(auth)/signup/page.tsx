@@ -27,7 +27,7 @@ export default function SignupPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      router.push("/day");
+      router.push("/guide");
       router.refresh();
     }
   }
