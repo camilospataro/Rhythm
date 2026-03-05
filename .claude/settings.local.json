@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm)",
+      "Bash(npx create-next-app@latest rhythm --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm)",
+      "Bash(npm install @supabase/supabase-js @supabase/ssr date-fns clsx tailwind-merge recharts)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(node -e \"const pkg = require\\(''@supabase/supabase-js/package.json''\\); console.log\\(pkg.version\\)\")",
+      "Bash(node -e \"const pkg = require\\(''@supabase/postgrest-js/package.json''\\); console.log\\(pkg.version\\)\")",
+      "Bash(npm run build)",
+      "Bash(npm run dev)",
+      "Bash(npx kill-port 3000 3001)",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(taskkill //F //PID 53188)",
+      "Bash(xargs grep -l \"recharts\")",
+      "Bash(find \"c:/Users/lenovo/Documents/app/Rhythm/src/app/\\(app\\)/tasks\" -type f -name \"*.tsx\")",
+      "Bash(npx tsc --noEmit --pretty)",
+      "Bash(xargs grep -l \"assignWeek\\\\|unassignWeek\")",
+      "Bash(xargs grep -l \"week_assignments\\\\|WeekAssignment\")",
+      "Bash(ls -la \"c:\\\\Users\\\\lenovo\\\\Documents\\\\app\\\\Rhythm\\\\src\\\\app\\\\\\(auth\\)\")",
+      "Bash(ls -la \"c:\\\\Users\\\\lenovo\\\\Documents\\\\app\\\\Rhythm\\\\src\\\\app\\\\\\(app\\)\")",
+      "Bash(ls -la \"c:\\\\Users\\\\lenovo\\\\Documents\\\\app\\\\Rhythm\\\\src\\\\app\\\\\\(auth\\)\\\\login\")",
+      "Bash(ls -la \"c:\\\\Users\\\\lenovo\\\\Documents\\\\app\\\\Rhythm\\\\src\\\\app\\\\\\(auth\\)\\\\signup\")",
+      "Bash(gh auth status)"
+    ]
+  }
+}
