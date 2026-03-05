@@ -73,16 +73,7 @@ export default function DayClient({ tasks, date, displayDate, completedCount, al
       {/* Date Navigation */}
       <div className="bg-surface glass border-b border-border shadow-[var(--glass-shadow)]">
         <div className="flex items-center h-14 max-w-lg mx-auto px-4">
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <LogoutButton />
-            <Link
-              href="/guide"
-              className="w-7 h-7 rounded-full border border-border bg-surface-hover flex items-center justify-center text-muted hover:text-primary hover:border-primary/30 transition-colors"
-              title="Help & Guide"
-            >
-              <span className="text-xs font-semibold">?</span>
-            </Link>
-          </div>
+          <div className="w-[4.25rem] flex-shrink-0" />
           <div className="flex-1 flex items-center justify-center gap-1">
             <Button variant="ghost" size="sm" onClick={() => goToDate(-1)}>
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -108,7 +99,16 @@ export default function DayClient({ tasks, date, displayDate, completedCount, al
               </svg>
             </Button>
           </div>
-          <div className="w-[4.25rem] flex-shrink-0" />
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <Link
+              href="/guide"
+              className="w-7 h-7 rounded-full border border-border bg-surface-hover flex items-center justify-center text-muted hover:text-primary hover:border-primary/30 transition-colors"
+              title="Help & Guide"
+            >
+              <span className="text-xs font-semibold">?</span>
+            </Link>
+            <LogoutButton />
+          </div>
         </div>
       </div>
 
