@@ -30,7 +30,7 @@ export default function Modal({ open, onClose, title, children, className }: Mod
       <div className="fixed inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
       <div
         className={cn(
-          "relative z-10 w-full sm:mx-4 max-w-lg bg-surface glass rounded-t-2xl sm:rounded-2xl p-6 max-h-[85vh] overflow-y-auto",
+          "relative z-10 w-full sm:mx-4 max-w-lg bg-surface glass rounded-t-2xl sm:rounded-2xl p-6 pb-24 sm:pb-6 max-h-[85vh] overflow-y-auto",
           className
         )}
       >
