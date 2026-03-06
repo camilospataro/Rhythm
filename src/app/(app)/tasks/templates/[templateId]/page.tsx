@@ -37,7 +37,7 @@ export default async function TemplateEditPage({
 
   return (
     <div>
-      <Header title="Edit Template" subtitle={template.name} />
+      <Header title="Edit Template" subtitle={template.name} backHref="/tasks" />
       <TemplateEditClient
         template={template}
         tasks={tasks || []}

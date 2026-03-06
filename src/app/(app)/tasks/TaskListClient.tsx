@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -17,6 +18,7 @@ interface TaskListClientProps {
 }
 
 export default function TaskListClient({ tasks, templates }: TaskListClientProps) {
+  const router = useRouter();
   const [showNewTask, setShowNewTask] = useState(false);
   const [showNewTemplate, setShowNewTemplate] = useState(false);
   const [templateName, setTemplateName] = useState("");
@@ -27,8 +29,11 @@ export default function TaskListClient({ tasks, templates }: TaskListClientProps
     type: TaskType;
     color?: string;
   }) {
-    await createTask(data);
+    const task = await createTask(data);
     setShowNewTask(false);
+    if (data.type === "multi_quality") {
+      router.push(`/tasks/${task.id}`);
+    }
   }
 
   async function handleCreateTemplate() {

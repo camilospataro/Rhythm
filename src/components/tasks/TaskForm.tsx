@@ -75,7 +75,7 @@ export default function TaskForm({
         <p className="text-xs text-muted mt-1.5">
           {type === "checkbox"
             ? "Simple on/off toggle for daily habits"
-            : "Track multiple sub-qualities, each with its own checkbox or rating scale"}
+            : "Track multiple sub-qualities with checkboxes or ratings. You'll configure them next."}
         </p>
       </div>
 
@@ -94,7 +94,7 @@ export default function TaskForm({
 
       <div className="flex gap-2 pt-2">
         <Button type="submit" disabled={loading || !name.trim()} className="flex-1">
-          {loading ? "Saving..." : submitLabel}
+          {loading ? "Saving..." : type === "multi_quality" ? "Create & Configure" : submitLabel}
         </Button>
         <Button type="button" variant="secondary" onClick={onCancel}>
           Cancel

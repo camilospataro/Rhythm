@@ -28,7 +28,7 @@ export default async function TaskEditPage({
 
   return (
     <div>
-      <Header title="Edit Task" subtitle={task.name} />
+      <Header title="Edit Task" subtitle={task.name} backHref="/tasks" />
       <TaskEditClient task={task} qualities={qualities || []} />
     </div>
   );
