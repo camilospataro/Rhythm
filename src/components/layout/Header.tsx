@@ -2,19 +2,22 @@
 
 import Link from "next/link";
 import LogoutButton from "./LogoutButton";
+import AdminButton from "./AdminButton";
 
 interface HeaderProps {
   title: string;
   subtitle?: string;
   action?: React.ReactNode;
   backHref?: string;
+  isAdmin?: boolean;
+  impersonatingEmail?: string | null;
 }
 
-export default function Header({ title, subtitle, action, backHref }: HeaderProps) {
+export default function Header({ title, subtitle, action, backHref, isAdmin: admin, impersonatingEmail }: HeaderProps) {
   return (
     <header className="bg-surface glass border-b border-border shadow-[var(--glass-shadow)]">
       <div className="px-4 max-w-lg mx-auto h-14 flex items-center">
-        <div className="w-[4.5rem] flex-shrink-0">
+        <div className="w-[4.5rem] flex-shrink-0 flex items-center gap-1">
           {backHref && (
             <Link
               href={backHref}
@@ -26,6 +29,7 @@ export default function Header({ title, subtitle, action, backHref }: HeaderProp
               </svg>
             </Link>
           )}
+          {admin && !backHref && <AdminButton impersonatingEmail={impersonatingEmail} />}
         </div>
         <div className="flex-1 flex flex-col items-center justify-center text-center min-w-0">
           <h1 className="text-base font-semibold tracking-tight truncate w-full">{title}</h1>

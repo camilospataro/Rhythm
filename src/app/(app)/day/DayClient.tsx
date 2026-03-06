@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { addDays } from "date-fns";
 import Link from "next/link";
 import LogoutButton from "@/components/layout/LogoutButton";
+import AdminButton from "@/components/layout/AdminButton";
 
 interface TaskOption {
   id: string;
@@ -27,9 +28,11 @@ interface DayClientProps {
   displayDate: string;
   completedCount: number;
   allTasks: TaskOption[];
+  isAdmin?: boolean;
+  impersonatingEmail?: string | null;
 }
 
-export default function DayClient({ tasks, date, displayDate, completedCount, allTasks }: DayClientProps) {
+export default function DayClient({ tasks, date, displayDate, completedCount, allTasks, isAdmin: admin, impersonatingEmail }: DayClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [optimisticDate, setOptimisticDate] = useState(date);
@@ -75,7 +78,9 @@ export default function DayClient({ tasks, date, displayDate, completedCount, al
       {/* Date Navigation */}
       <div className="bg-surface glass border-b border-border shadow-[var(--glass-shadow)]">
         <div className="flex items-center h-14 max-w-lg mx-auto px-4">
-          <div className="w-[4.5rem] flex-shrink-0" />
+          <div className="w-[4.5rem] flex-shrink-0">
+            {admin && <AdminButton impersonatingEmail={impersonatingEmail} />}
+          </div>
           <div className="flex-1 flex items-center justify-center gap-1">
             <Button variant="ghost" size="sm" onClick={() => goToDate(-1)}>
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">

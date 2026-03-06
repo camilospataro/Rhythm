@@ -1,11 +1,13 @@
 import { createClient, getUserId } from "@/lib/supabase/server";
 import Header from "@/components/layout/Header";
 import TaskListClient from "./TaskListClient";
+import { getAdminInfo } from "@/lib/admin";
 
 export default async function TasksPage() {
   const supabase = await createClient();
   const userId = await getUserId();
   if (!userId) return null;
+  const adminInfo = await getAdminInfo();
 
   const { data: tasks } = await supabase
     .from("tasks")
@@ -23,7 +25,7 @@ export default async function TasksPage() {
 
   return (
     <div>
-      <Header title="Task Manager" />
+      <Header title="Task Manager" isAdmin={!!adminInfo} impersonatingEmail={adminInfo?.impersonatingEmail} />
       <TaskListClient tasks={tasks || []} templates={templates || []} />
     </div>
   );

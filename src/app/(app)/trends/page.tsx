@@ -2,11 +2,13 @@ import { createClient, getUserId } from "@/lib/supabase/server";
 import Header from "@/components/layout/Header";
 import TrendsClient from "./TrendsClient";
 import type { Task, Completion, TaskQuality, QualityCompletion } from "@/types/database";
+import { getAdminInfo } from "@/lib/admin";
 
 export default async function TrendsPage() {
   const supabase = await createClient();
   const userId = await getUserId();
   if (!userId) return null;
+  const adminInfo = await getAdminInfo();
 
   const { data: tasks } = await supabase
     .from("tasks")
@@ -49,7 +51,7 @@ export default async function TrendsPage() {
 
   return (
     <div>
-      <Header title="Trends" subtitle="Track your progress over time" />
+      <Header title="Trends" subtitle="Track your progress over time" isAdmin={!!adminInfo} impersonatingEmail={adminInfo?.impersonatingEmail} />
       <TrendsClient
         tasks={(tasks as Task[]) || []}
         completions={(completions as Completion[]) || []}

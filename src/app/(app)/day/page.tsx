@@ -2,6 +2,7 @@ import { resolveTasksForDate } from "@/lib/resolveTemplate";
 import { formatDate, formatDisplayDate } from "@/lib/dates";
 import { createClient, getUserId } from "@/lib/supabase/server";
 import DayClient from "./DayClient";
+import { getAdminInfo } from "@/lib/admin";
 
 interface DayPageProps {
   searchParams: Promise<{ date?: string }>;
@@ -27,6 +28,8 @@ export default async function DayPage({ searchParams }: DayPageProps) {
         .order("name")
     : { data: null };
 
+  const adminInfo = await getAdminInfo();
+
   const completedCount = tasks.filter((t) => {
     if (t.type === "checkbox") return t.completion?.completed;
     if (t.type === "multi_quality") {
@@ -50,6 +53,8 @@ export default async function DayPage({ searchParams }: DayPageProps) {
       displayDate={displayDate}
       completedCount={completedCount}
       allTasks={allTasksData || []}
+      isAdmin={!!adminInfo}
+      impersonatingEmail={adminInfo?.impersonatingEmail}
     />
   );
 }

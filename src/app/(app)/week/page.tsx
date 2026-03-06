@@ -1,6 +1,7 @@
 import { createClient, getUserId } from "@/lib/supabase/server";
 import { getWeekNumber, getWeekYear, getWeekDates, formatDate, DAY_NAMES } from "@/lib/dates";
 import WeekClient from "./WeekClient";
+import { getAdminInfo } from "@/lib/admin";
 
 interface WeekPageProps {
   searchParams: Promise<{ year?: string; week?: string }>;
@@ -86,6 +87,8 @@ export default async function WeekPage({ searchParams }: WeekPageProps) {
     .gte("date", startDate)
     .lte("date", endDate);
 
+  const adminInfo = await getAdminInfo();
+
   return (
     <div>
       <WeekClient
@@ -99,6 +102,8 @@ export default async function WeekPage({ searchParams }: WeekPageProps) {
         templates={allTemplates || []}
         currentTemplateId={templateId || null}
         hasExplicitAssignment={!!assignment}
+        isAdmin={!!adminInfo}
+        impersonatingEmail={adminInfo?.impersonatingEmail}
       />
     </div>
   );
