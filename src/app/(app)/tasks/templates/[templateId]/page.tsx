@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUserId } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Header from "@/components/layout/Header";
 import TemplateEditClient from "./TemplateEditClient";
@@ -10,6 +10,8 @@ export default async function TemplateEditPage({
 }) {
   const { templateId } = await params;
   const supabase = await createClient();
+  const userId = await getUserId();
+  if (!userId) return null;
 
   const { data: template } = await supabase
     .from("week_templates")
@@ -22,6 +24,7 @@ export default async function TemplateEditPage({
   const { data: tasks } = await supabase
     .from("tasks")
     .select("*")
+    .eq("user_id", userId)
     .eq("archived", false)
     .order("sort_order")
     .order("created_at");
