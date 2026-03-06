@@ -26,7 +26,6 @@ export default function CheckboxTask({ task, date }: CheckboxTaskProps) {
       try {
         await toggleCompletion(task.id, date);
       } catch (err) {
-        console.error("Toggle failed:", err);
         alert(err instanceof Error ? err.message : "Something went wrong");
       }
     });

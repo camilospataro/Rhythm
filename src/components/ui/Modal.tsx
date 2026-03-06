@@ -26,11 +26,11 @@ export default function Modal({ open, onClose, title, children, className }: Mod
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-      <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" role="dialog" aria-modal="true">
+      <div className="fixed inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
       <div
         className={cn(
-          "relative z-10 w-full max-w-lg bg-surface rounded-t-2xl sm:rounded-2xl p-6 max-h-[85vh] overflow-y-auto",
+          "relative z-10 w-full sm:mx-4 max-w-lg bg-surface glass rounded-t-2xl sm:rounded-2xl p-6 max-h-[85vh] overflow-y-auto",
           className
         )}
       >

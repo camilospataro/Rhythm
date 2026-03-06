@@ -1,6 +1,5 @@
 import { createClient, getUserId } from "@/lib/supabase/server";
 import { getWeekNumber, getWeekYear, getWeekDates, formatDate, DAY_NAMES } from "@/lib/dates";
-import Header from "@/components/layout/Header";
 import WeekClient from "./WeekClient";
 
 interface WeekPageProps {
@@ -89,13 +88,10 @@ export default async function WeekPage({ searchParams }: WeekPageProps) {
 
   return (
     <div>
-      <Header
-        title={`Week ${week}`}
-        subtitle={templateName ? `Template: ${templateName}` : "No template assigned"}
-      />
       <WeekClient
         year={year}
         week={week}
+        templateName={templateName}
         weekDates={weekDates.map((d) => formatDate(d))}
         dayNames={DAY_NAMES}
         dayTasks={dayTasks}

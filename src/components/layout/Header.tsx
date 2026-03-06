@@ -12,16 +12,18 @@ interface HeaderProps {
 export default function Header({ title, subtitle, action }: HeaderProps) {
   return (
     <header className="bg-surface glass border-b border-border shadow-[var(--glass-shadow)]">
-      <div className="relative px-4 max-w-lg mx-auto text-center h-14 flex items-center justify-center">
-        <div className="flex flex-col items-center justify-center">
-          <h1 className="text-base font-semibold tracking-tight">{title}</h1>
-          {subtitle && <p className="text-xs text-muted">{subtitle}</p>}
+      <div className="px-4 max-w-lg mx-auto h-14 flex items-center">
+        <div className="w-[4.5rem] flex-shrink-0" />
+        <div className="flex-1 flex flex-col items-center justify-center text-center min-w-0">
+          <h1 className="text-base font-semibold tracking-tight truncate w-full">{title}</h1>
+          {subtitle && <p className="text-xs text-muted truncate w-full">{subtitle}</p>}
           {action && <div className="mt-1">{action}</div>}
         </div>
-        <div className="absolute right-4 flex items-center gap-1.5">
+        <div className="flex items-center gap-1 flex-shrink-0">
           <Link
             href="/guide"
-            className="w-7 h-7 rounded-full border border-border bg-surface-hover flex items-center justify-center text-muted hover:text-primary hover:border-primary/30 transition-colors"
+            className="w-8 h-8 rounded-full border border-border bg-surface-hover flex items-center justify-center text-muted hover:text-primary hover:border-primary/30 transition-colors"
+            aria-label="Help & Guide"
             title="Help & Guide"
           >
             <span className="text-xs font-semibold">?</span>

@@ -42,10 +42,10 @@ export async function toggleCompletion(taskId: string, date: string) {
 }
 
 export async function setRating(taskId: string, date: string, rating: number) {
-  console.log("[setRating] called:", { taskId, date, rating });
+
   const supabase = await createClient();
   const userId = await getUserId();
-  console.log("[setRating] userId:", userId);
+
   if (!userId) throw new Error("Not authenticated");
 
   const { data: existing, error: fetchErr } = await supabase
@@ -56,14 +56,14 @@ export async function setRating(taskId: string, date: string, rating: number) {
     .eq("date", date)
     .single();
 
-  console.log("[setRating] existing:", existing, "fetchErr:", fetchErr?.message);
+
 
   if (existing) {
     const { error } = await supabase
       .from("completions")
       .update({ rating })
       .eq("id", existing.id);
-    console.log("[setRating] update result:", error?.message || "OK");
+
     if (error) throw new Error(`setRating update: ${error.message}`);
   } else {
     const { error } = await supabase.from("completions").insert({
@@ -72,7 +72,7 @@ export async function setRating(taskId: string, date: string, rating: number) {
       date,
       rating,
     });
-    console.log("[setRating] insert result:", error?.message || "OK");
+
     if (error) throw new Error(`setRating insert: ${error.message}`);
   }
 
@@ -107,13 +107,13 @@ export async function setQualityRating(
   qualityId: string,
   rating: number
 ) {
-  console.log("[setQualityRating] called:", { taskId, date, qualityId, rating });
+
   const supabase = await createClient();
   const userId = await getUserId();
   if (!userId) throw new Error("Not authenticated");
 
   const completion = await getOrCreateCompletion(supabase, userId, taskId, date);
-  console.log("[setQualityRating] completion:", completion.id);
+
 
   const { data: existing } = await supabase
     .from("quality_completions")
@@ -122,14 +122,14 @@ export async function setQualityRating(
     .eq("quality_id", qualityId)
     .single();
 
-  console.log("[setQualityRating] existing:", existing);
+
 
   if (existing) {
     const { error } = await supabase
       .from("quality_completions")
       .update({ rating })
       .eq("id", existing.id);
-    console.log("[setQualityRating] update:", error?.message || "OK");
+
     if (error) throw new Error(`setQualityRating update: ${error.message}`);
   } else {
     const { error } = await supabase.from("quality_completions").insert({
@@ -138,7 +138,7 @@ export async function setQualityRating(
       user_id: userId,
       rating,
     });
-    console.log("[setQualityRating] insert:", error?.message || "OK");
+
     if (error) throw new Error(`setQualityRating insert: ${error.message}`);
   }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import CheckboxTask from "@/components/day/CheckboxTask";
 import MultiQualityTask from "@/components/day/MultiQualityTask";
 import Button from "@/components/ui/Button";
@@ -35,10 +35,12 @@ export default function DayClient({ tasks, date, displayDate, completedCount, al
   const [optimisticDate, setOptimisticDate] = useState(date);
   const [showPicker, setShowPicker] = useState(false);
 
-  const templateTasks = tasks.filter((t) => !t.isStandalone);
-  const standaloneTasks = tasks.filter((t) => t.isStandalone);
-  const taskIdsOnDay = new Set(tasks.map((t) => t.id));
-  const availableTasks = allTasks.filter((t) => !taskIdsOnDay.has(t.id));
+  const templateTasks = useMemo(() => tasks.filter((t) => !t.isStandalone), [tasks]);
+  const standaloneTasks = useMemo(() => tasks.filter((t) => t.isStandalone), [tasks]);
+  const availableTasks = useMemo(() => {
+    const taskIdsOnDay = new Set(tasks.map((t) => t.id));
+    return allTasks.filter((t) => !taskIdsOnDay.has(t.id));
+  }, [tasks, allTasks]);
 
   function renderTask(task: ResolvedTask, taskDate: string) {
     switch (task.type) {
@@ -73,7 +75,7 @@ export default function DayClient({ tasks, date, displayDate, completedCount, al
       {/* Date Navigation */}
       <div className="bg-surface glass border-b border-border shadow-[var(--glass-shadow)]">
         <div className="flex items-center h-14 max-w-lg mx-auto px-4">
-          <div className="w-[4.25rem] flex-shrink-0" />
+          <div className="w-[4.5rem] flex-shrink-0" />
           <div className="flex-1 flex items-center justify-center gap-1">
             <Button variant="ghost" size="sm" onClick={() => goToDate(-1)}>
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -102,7 +104,8 @@ export default function DayClient({ tasks, date, displayDate, completedCount, al
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <Link
               href="/guide"
-              className="w-7 h-7 rounded-full border border-border bg-surface-hover flex items-center justify-center text-muted hover:text-primary hover:border-primary/30 transition-colors"
+              className="w-8 h-8 rounded-full border border-border bg-surface-hover flex items-center justify-center text-muted hover:text-primary hover:border-primary/30 transition-colors"
+              aria-label="Help & Guide"
               title="Help & Guide"
             >
               <span className="text-xs font-semibold">?</span>
@@ -158,7 +161,8 @@ export default function DayClient({ tasks, date, displayDate, completedCount, al
                       router.refresh();
                     });
                   }}
-                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-surface-hover flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-muted hover:text-danger"
+                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-surface-hover flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity text-muted hover:text-danger"
+                  aria-label="Remove from day"
                   title="Remove from day"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">

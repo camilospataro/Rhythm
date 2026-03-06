@@ -1,5 +1,4 @@
 import { createClient, getUserId } from "@/lib/supabase/server";
-import Header from "@/components/layout/Header";
 import MonthClient from "./MonthClient";
 import { getWeekNumber, getWeekYear } from "@/lib/dates";
 import { startOfMonth, endOfMonth, startOfWeek, addDays, format } from "date-fns";
@@ -114,8 +113,8 @@ export default async function MonthPage({ searchParams }: MonthPageProps) {
 
   return (
     <div>
-      <Header title={monthName} />
       <MonthClient
+        monthName={monthName}
         year={year}
         month={month}
         dailySummary={dailySummary}

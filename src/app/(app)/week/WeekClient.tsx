@@ -6,6 +6,9 @@ import { assignWeek, unassignWeek } from "@/actions/templates";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+import Link from "next/link";
+import LogoutButton from "@/components/layout/LogoutButton";
 import type { Completion } from "@/types/database";
 
 interface DayTask {
@@ -22,6 +25,7 @@ interface TemplateOption {
 interface WeekClientProps {
   year: number;
   week: number;
+  templateName: string | undefined;
   weekDates: string[];
   dayNames: string[];
   dayTasks: Record<number, DayTask[]>;
@@ -34,6 +38,7 @@ interface WeekClientProps {
 export default function WeekClient({
   year,
   week,
+  templateName,
   weekDates,
   dayNames,
   dayTasks,
@@ -58,7 +63,6 @@ export default function WeekClient({
         setShowSelector(false);
         router.refresh();
       } catch (err) {
-        console.error("Failed to assign template:", err);
         alert(err instanceof Error ? err.message : "Something went wrong");
       }
     });
@@ -81,7 +85,29 @@ export default function WeekClient({
   }
 
   return (
-    <div className="p-4 max-w-lg mx-auto">
+    <div>
+      {/* Logo Header */}
+      <header className="bg-surface glass border-b border-border shadow-[var(--glass-shadow)]">
+        <div className="px-4 max-w-lg mx-auto h-14 flex items-center">
+          <div className="w-[4.5rem] flex-shrink-0" />
+          <div className="flex-1 flex items-center justify-center">
+            <Image src="/logo.png" alt="Rhythm" width={100} height={32} className="h-7 w-auto dark:invert" priority />
+          </div>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <Link
+              href="/guide"
+              className="w-8 h-8 rounded-full border border-border bg-surface-hover flex items-center justify-center text-muted hover:text-primary hover:border-primary/30 transition-colors"
+              aria-label="Help & Guide"
+              title="Help & Guide"
+            >
+              <span className="text-xs font-semibold">?</span>
+            </Link>
+            <LogoutButton />
+          </div>
+        </div>
+      </header>
+
+      <div className="p-4 max-w-lg mx-auto">
       {/* Navigation */}
       <div className="flex items-center justify-between mb-4">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
@@ -89,14 +115,15 @@ export default function WeekClient({
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
           </svg>
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
+        <button
           onClick={() => router.push("/week")}
-          className="text-primary text-xs"
+          className="text-center flex flex-col items-center"
         >
-          This Week
-        </Button>
+          <span className="text-sm font-semibold">Week {week}</span>
+          <span className="text-xs text-muted">
+            {templateName ? `Template: ${templateName}` : "No template assigned"}
+          </span>
+        </button>
         <Button variant="ghost" size="sm" onClick={() => navigate(1)}>
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
@@ -266,6 +293,7 @@ export default function WeekClient({
             </Card>
           );
         })}
+      </div>
       </div>
     </div>
   );

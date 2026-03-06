@@ -40,34 +40,31 @@ export default function MultiQualityTask({ task, date }: MultiQualityTaskProps) 
   const isUpcoming = timeState === "upcoming";
   const scheduleLabel = getScheduleLabel(task.schedule, timeState);
 
-  function handleAction(label: string, action: () => Promise<void>) {
+  function handleAction(action: () => Promise<void>) {
     if (isLocked) return;
-    console.log(`[MultiQualityTask] ${label} triggered`);
     startTransition(async () => {
       try {
         await action();
-        console.log(`[MultiQualityTask] ${label} completed`);
       } catch (err) {
-        console.error(`[MultiQualityTask] ${label} failed:`, err);
         alert(err instanceof Error ? err.message : "Something went wrong");
       }
     });
   }
 
   function handleMainToggle() {
-    handleAction("mainToggle", () => toggleCompletion(task.id, date));
+    handleAction(() => toggleCompletion(task.id, date));
   }
 
   function handleMainRate(value: number) {
-    handleAction(`mainRate(${value})`, () => setRating(task.id, date, value));
+    handleAction(() => setRating(task.id, date, value));
   }
 
   function handleQualityRate(qualityId: string, value: number) {
-    handleAction(`qualityRate(${qualityId}, ${value})`, () => setQualityRating(task.id, date, qualityId, value));
+    handleAction(() => setQualityRating(task.id, date, qualityId, value));
   }
 
   function handleQualityToggle(qualityId: string) {
-    handleAction(`qualityToggle(${qualityId})`, () => toggleQualityCheckbox(task.id, date, qualityId));
+    handleAction(() => toggleQualityCheckbox(task.id, date, qualityId));
   }
 
   function getQualityCompletion(qualityId: string) {
@@ -103,7 +100,7 @@ export default function MultiQualityTask({ task, date }: MultiQualityTaskProps) 
     const next = current.includes(tag)
       ? current.filter((t) => t !== tag)
       : [...current, tag];
-    handleAction(`tagToggle(${qualityId}, ${tag})`, () => updateQualityTags(task.id, date, qualityId, next));
+    handleAction(() => updateQualityTags(task.id, date, qualityId, next));
   }
 
   return (
