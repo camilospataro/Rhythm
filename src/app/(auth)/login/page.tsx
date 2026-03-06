@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -35,10 +36,8 @@ export default function LoginPage() {
   return (
     <div>
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
-          Rhythm
-        </h1>
-        <p className="text-muted mt-1 text-sm">Track your habits, build your life</p>
+        <Image src="/logo.png" alt="Rhythm" width={140} height={45} className="h-10 w-auto mx-auto dark:invert" priority />
+        <p className="text-muted mt-3 text-sm">Track your habits, build your life</p>
       </div>
 
       <div className="bg-surface glass rounded-2xl border border-border shadow-[var(--glass-shadow-lg)] p-6">
