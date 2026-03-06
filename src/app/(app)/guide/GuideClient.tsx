@@ -307,7 +307,7 @@ export default function GuideClient() {
                     await enterAdminMode(adminPassword);
                     setAdminPassword("");
                     setShowAdminInput(false);
-                    router.refresh();
+                    router.push("/admin");
                   } catch (err) {
                     setAdminError(err instanceof Error ? err.message : "Error");
                   }
