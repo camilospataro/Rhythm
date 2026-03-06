@@ -36,7 +36,7 @@ export default function LoginPage() {
   return (
     <div>
       <div className="text-center mb-8">
-        <Image src="/logo.png" alt="Rhythm" width={140} height={45} className="h-10 w-auto mx-auto dark:invert" priority />
+        <Image src="/logo.png" alt="Rhythm" width={140} height={45} className="h-14 w-auto mx-auto dark:invert" priority />
         <p className="text-muted mt-3 text-sm">Track your habits, build your life</p>
       </div>
 
