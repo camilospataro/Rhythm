@@ -285,15 +285,15 @@ export default function GuideClient() {
           </p>
         </div>
 
-        {/* Hidden Admin Entry */}
-        <div className="flex justify-center pb-8">
+        {/* Admin Entry */}
+        <div className="flex flex-col items-center pb-8 gap-2">
           {!showAdminInput ? (
             <button
               onClick={() => setShowAdminInput(true)}
-              className="w-7 h-7 rounded-full flex items-center justify-center text-muted/30 hover:text-muted/60 transition-colors"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-muted hover:text-primary border border-transparent hover:border-border transition-colors"
               aria-label="Admin"
             >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
               </svg>
             </button>
@@ -342,7 +342,7 @@ export default function GuideClient() {
             </form>
           )}
           {adminError && (
-            <p className="text-xs text-danger mt-1">{adminError}</p>
+            <p className="text-xs text-danger">{adminError}</p>
           )}
         </div>
       </div>
