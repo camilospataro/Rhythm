@@ -28,12 +28,37 @@ export async function createClient() {
   );
 }
 
-/** Returns the current user ID (real auth or dev bypass) */
+/** Returns the current user ID (real auth, dev bypass, or admin impersonation) */
 export async function getUserId(): Promise<string | null> {
   if (isDevBypass()) {
     return DEV_USER_ID;
   }
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  // Check for admin impersonation (admin_session cookie = password-based admin mode)
+  const cookieStore = await cookies();
+  const impersonateId = cookieStore.get("admin_impersonate_user_id")?.value;
+  if (impersonateId && cookieStore.get("admin_session")?.value === "true") {
+    return impersonateId;
+  }
+
+  return user.id;
+}
+
+/** Returns the real authenticated user ID (never impersonated) */
+export async function getRealUserId(): Promise<string | null> {
+  if (isDevBypass()) {
+    return DEV_USER_ID;
+  }
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   return user?.id ?? null;
+}
+
+/** Returns the impersonated user ID if admin is impersonating, or null */
+export async function getImpersonatedUserId(): Promise<string | null> {
+  const cookieStore = await cookies();
+  return cookieStore.get("admin_impersonate_user_id")?.value || null;
 }

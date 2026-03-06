@@ -1,11 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import { enterAdminMode } from "@/actions/admin";
 
 export default function GuideClient() {
   const router = useRouter();
+  const [showAdminInput, setShowAdminInput] = useState(false);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminError, setAdminError] = useState("");
+  const [isPending, startTransition] = useTransition();
 
   return (
     <div>
@@ -277,6 +283,67 @@ export default function GuideClient() {
           <p className="text-center text-xs text-muted mt-3">
             Head to Tasks to create your first task and template.
           </p>
+        </div>
+
+        {/* Hidden Admin Entry */}
+        <div className="flex justify-center pb-8">
+          {!showAdminInput ? (
+            <button
+              onClick={() => setShowAdminInput(true)}
+              className="w-7 h-7 rounded-full flex items-center justify-center text-muted/30 hover:text-muted/60 transition-colors"
+              aria-label="Admin"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+              </svg>
+            </button>
+          ) : (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setAdminError("");
+                startTransition(async () => {
+                  try {
+                    await enterAdminMode(adminPassword);
+                    setAdminPassword("");
+                    setShowAdminInput(false);
+                    router.refresh();
+                  } catch (err) {
+                    setAdminError(err instanceof Error ? err.message : "Error");
+                  }
+                });
+              }}
+              className="flex items-center gap-2"
+            >
+              <input
+                type="password"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                placeholder="Password"
+                className="w-32 px-2.5 py-1.5 text-xs rounded-lg border border-border bg-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+                autoFocus
+              />
+              <button
+                type="submit"
+                disabled={isPending || !adminPassword}
+                className="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50"
+              >
+                {isPending ? "..." : "Go"}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setShowAdminInput(false); setAdminError(""); setAdminPassword(""); }}
+                className="text-muted hover:text-foreground transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </form>
+          )}
+          {adminError && (
+            <p className="text-xs text-danger mt-1">{adminError}</p>
+          )}
         </div>
       </div>
     </div>

@@ -3,11 +3,35 @@
 import { isAdmin } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 async function requireAdmin() {
   if (!(await isAdmin())) {
     throw new Error("Unauthorized");
   }
+}
+
+export async function enterAdminMode(password: string) {
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) throw new Error("Admin not configured");
+  if (password !== adminPassword) throw new Error("Wrong password");
+
+  const cookieStore = await cookies();
+  cookieStore.set("admin_session", "true", {
+    path: "/",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24, // 24 hours
+  });
+  revalidatePath("/");
+}
+
+export async function exitAdminMode() {
+  const cookieStore = await cookies();
+  cookieStore.delete("admin_session");
+  cookieStore.delete("admin_impersonate_user_id");
+  revalidatePath("/");
 }
 
 export async function adminDeleteTask(taskId: string) {
@@ -88,4 +112,24 @@ export async function adminDeleteUser(userId: string) {
   await supabase.auth.admin.deleteUser(userId);
 
   revalidatePath("/admin");
+}
+
+export async function impersonateUser(userId: string) {
+  await requireAdmin();
+  const cookieStore = await cookies();
+  cookieStore.set("admin_impersonate_user_id", userId, {
+    path: "/",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24, // 24 hours
+  });
+  revalidatePath("/");
+}
+
+export async function stopImpersonation() {
+  await requireAdmin();
+  const cookieStore = await cookies();
+  cookieStore.delete("admin_impersonate_user_id");
+  revalidatePath("/");
 }
