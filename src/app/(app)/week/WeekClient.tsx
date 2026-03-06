@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import LogoutButton from "@/components/layout/LogoutButton";
+import AdminButton from "@/components/layout/AdminButton";
 import type { Completion } from "@/types/database";
 
 interface DayTask {
@@ -33,6 +34,8 @@ interface WeekClientProps {
   templates: TemplateOption[];
   currentTemplateId: string | null;
   hasExplicitAssignment: boolean;
+  isAdmin?: boolean;
+  impersonatingEmail?: string | null;
 }
 
 export default function WeekClient({
@@ -46,6 +49,8 @@ export default function WeekClient({
   templates,
   currentTemplateId,
   hasExplicitAssignment,
+  isAdmin: admin,
+  impersonatingEmail,
 }: WeekClientProps) {
   const router = useRouter();
   const today = new Date().toISOString().split("T")[0];
@@ -89,7 +94,9 @@ export default function WeekClient({
       {/* Logo Header */}
       <header className="bg-surface glass border-b border-border shadow-[var(--glass-shadow)]">
         <div className="px-4 max-w-lg mx-auto h-14 flex items-center">
-          <div className="w-[4.5rem] flex-shrink-0" />
+          <div className="w-[4.5rem] flex-shrink-0">
+            {admin && <AdminButton impersonatingEmail={impersonatingEmail} />}
+          </div>
           <div className="flex-1 flex items-center justify-center">
             <Image src="/logo.png" alt="Rhythm" width={100} height={32} className="h-7 w-auto dark:invert" priority />
           </div>

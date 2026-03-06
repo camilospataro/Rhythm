@@ -2,6 +2,7 @@ import { createClient, getUserId } from "@/lib/supabase/server";
 import MonthClient from "./MonthClient";
 import { getWeekNumber, getWeekYear } from "@/lib/dates";
 import { startOfMonth, endOfMonth, startOfWeek, addDays, format } from "date-fns";
+import { getAdminInfo } from "@/lib/admin";
 
 interface MonthPageProps {
   searchParams: Promise<{ year?: string; month?: string }>;
@@ -100,6 +101,7 @@ export default async function MonthPage({ searchParams }: MonthPageProps) {
     .order("name");
 
   const defaultTemplate = (allTemplates || []).find((t) => t.is_default);
+  const adminInfo = await getAdminInfo();
 
   const weekInfos = weeksInMonth.map((w) => {
     const key = `${w.year}-${w.weekNumber}`;
@@ -120,6 +122,8 @@ export default async function MonthPage({ searchParams }: MonthPageProps) {
         dailySummary={dailySummary}
         templates={allTemplates || []}
         weekInfos={weekInfos}
+        isAdmin={!!adminInfo}
+        impersonatingEmail={adminInfo?.impersonatingEmail}
       />
     </div>
   );

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-import { adminDeleteUser } from "@/actions/admin";
+import { adminDeleteUser, impersonateUser } from "@/actions/admin";
 
 interface UserSummary {
   id: string;
@@ -23,6 +23,13 @@ export default function AdminDashboard({ users }: { users: UserSummary[] }) {
     startTransition(async () => {
       await adminDeleteUser(userId);
       router.refresh();
+    });
+  }
+
+  function handleImpersonate(userId: string) {
+    startTransition(async () => {
+      await impersonateUser(userId);
+      router.push("/day");
     });
   }
 
@@ -63,8 +70,14 @@ export default function AdminDashboard({ users }: { users: UserSummary[] }) {
             </button>
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
-                onClick={() => router.push(`/admin/users/${user.id}`)}
+                onClick={() => handleImpersonate(user.id)}
                 className="px-3 py-1.5 text-xs font-medium rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              >
+                Impersonate
+              </button>
+              <button
+                onClick={() => router.push(`/admin/users/${user.id}`)}
+                className="px-3 py-1.5 text-xs font-medium rounded-lg bg-surface-hover text-muted hover:text-foreground transition-colors"
               >
                 View
               </button>

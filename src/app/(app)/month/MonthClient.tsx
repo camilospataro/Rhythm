@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import LogoutButton from "@/components/layout/LogoutButton";
+import AdminButton from "@/components/layout/AdminButton";
 import {
   startOfMonth,
   endOfMonth,
@@ -42,9 +43,11 @@ interface MonthClientProps {
   dailySummary: Record<string, { completed: number; total: number }>;
   templates: TemplateOption[];
   weekInfos: WeekInfo[];
+  isAdmin?: boolean;
+  impersonatingEmail?: string | null;
 }
 
-export default function MonthClient({ monthName, year, month, dailySummary, templates, weekInfos }: MonthClientProps) {
+export default function MonthClient({ monthName, year, month, dailySummary, templates, weekInfos, isAdmin: admin, impersonatingEmail }: MonthClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const date = new Date(year, month - 1, 1);
@@ -138,7 +141,9 @@ export default function MonthClient({ monthName, year, month, dailySummary, temp
       {/* Logo Header */}
       <header className="bg-surface glass border-b border-border shadow-[var(--glass-shadow)]">
         <div className="px-4 max-w-lg mx-auto h-14 flex items-center">
-          <div className="w-[4.5rem] flex-shrink-0" />
+          <div className="w-[4.5rem] flex-shrink-0">
+            {admin && <AdminButton impersonatingEmail={impersonatingEmail} />}
+          </div>
           <div className="flex-1 flex items-center justify-center">
             <Image src="/logo.png" alt="Rhythm" width={100} height={32} className="h-7 w-auto dark:invert" priority />
           </div>
