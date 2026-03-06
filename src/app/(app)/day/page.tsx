@@ -14,11 +14,17 @@ export default async function DayPage({ searchParams }: DayPageProps) {
   const dateStr = formatDate(date);
   const displayDate = formatDisplayDate(date);
 
-  const tasks = await resolveTasksForDate(date);
+  const [tasks, adminInfo, { supabase, userId }] = await Promise.all([
+    resolveTasksForDate(date),
+    getAdminInfo(),
+    (async () => {
+      const supabase = await createClient();
+      const userId = await getUserId();
+      return { supabase, userId };
+    })(),
+  ]);
 
   // Fetch all non-archived tasks for the task picker
-  const supabase = await createClient();
-  const userId = await getUserId();
   const { data: allTasksData } = userId
     ? await supabase
         .from("tasks")
@@ -27,8 +33,6 @@ export default async function DayPage({ searchParams }: DayPageProps) {
         .eq("archived", false)
         .order("name")
     : { data: null };
-
-  const adminInfo = await getAdminInfo();
 
   const completedCount = tasks.filter((t) => {
     if (t.type === "checkbox") return t.completion?.completed;

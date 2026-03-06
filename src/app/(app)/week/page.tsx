@@ -18,14 +18,31 @@ export default async function WeekPage({ searchParams }: WeekPageProps) {
   const userId = await getUserId();
   if (!userId) return null;
 
-  // Get template for this week
-  const { data: assignment } = await supabase
-    .from("week_assignments")
-    .select("template_id, week_templates(name)")
-    .eq("user_id", userId)
-    .eq("year", year)
-    .eq("week_number", week)
-    .single();
+  // Run independent queries in parallel
+  const startDate = formatDate(weekDates[0]);
+  const endDate = formatDate(weekDates[6]);
+
+  const [{ data: assignment }, { data: allTemplates }, { data: completions }, adminInfo] = await Promise.all([
+    supabase
+      .from("week_assignments")
+      .select("template_id, week_templates(name)")
+      .eq("user_id", userId)
+      .eq("year", year)
+      .eq("week_number", week)
+      .single(),
+    supabase
+      .from("week_templates")
+      .select("id, name, is_default")
+      .eq("user_id", userId)
+      .order("name"),
+    supabase
+      .from("completions")
+      .select("*")
+      .eq("user_id", userId)
+      .gte("date", startDate)
+      .lte("date", endDate),
+    getAdminInfo(),
+  ]);
 
   let templateId = assignment?.template_id;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,12 +52,7 @@ export default async function WeekPage({ searchParams }: WeekPageProps) {
     : weekTemplatesJoin?.name;
 
   if (!templateId) {
-    const { data: defaultTemplate } = await supabase
-      .from("week_templates")
-      .select("id, name")
-      .eq("user_id", userId)
-      .eq("is_default", true)
-      .single();
+    const defaultTemplate = (allTemplates || []).find((t) => t.is_default);
     templateId = defaultTemplate?.id;
     templateName = defaultTemplate?.name;
   }
@@ -59,7 +71,6 @@ export default async function WeekPage({ searchParams }: WeekPageProps) {
       for (const dt of data) {
         const dayOfWeek = dt.day_of_week as number;
         if (!dayTasks[dayOfWeek]) dayTasks[dayOfWeek] = [];
-        // Supabase join returns the related record (singular FK) as an object
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tasksJoin = (dt as any).tasks;
         const taskData = Array.isArray(tasksJoin) ? tasksJoin[0] : tasksJoin;
@@ -69,25 +80,6 @@ export default async function WeekPage({ searchParams }: WeekPageProps) {
       }
     }
   }
-
-  // Get all templates for the selector
-  const { data: allTemplates } = await supabase
-    .from("week_templates")
-    .select("id, name, is_default")
-    .eq("user_id", userId)
-    .order("name");
-
-  // Get completions for the entire week
-  const startDate = formatDate(weekDates[0]);
-  const endDate = formatDate(weekDates[6]);
-  const { data: completions } = await supabase
-    .from("completions")
-    .select("*")
-    .eq("user_id", userId)
-    .gte("date", startDate)
-    .lte("date", endDate);
-
-  const adminInfo = await getAdminInfo();
 
   return (
     <div>

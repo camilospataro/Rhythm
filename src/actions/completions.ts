@@ -3,10 +3,8 @@
 import { createClient, getUserId } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
-function revalidateAll() {
+function revalidateDay() {
   revalidatePath("/day");
-  revalidatePath("/week");
-  revalidatePath("/month");
 }
 
 export async function toggleCompletion(taskId: string, date: string) {
@@ -38,7 +36,7 @@ export async function toggleCompletion(taskId: string, date: string) {
     if (error) throw new Error(`toggleCompletion insert: ${error.message}`);
   }
 
-  revalidateAll();
+  revalidateDay();
 }
 
 export async function setRating(taskId: string, date: string, rating: number) {
@@ -76,7 +74,7 @@ export async function setRating(taskId: string, date: string, rating: number) {
     if (error) throw new Error(`setRating insert: ${error.message}`);
   }
 
-  revalidateAll();
+  revalidateDay();
 }
 
 async function getOrCreateCompletion(supabase: any, userId: string, taskId: string, date: string) {
@@ -142,7 +140,7 @@ export async function setQualityRating(
     if (error) throw new Error(`setQualityRating insert: ${error.message}`);
   }
 
-  revalidateAll();
+  revalidateDay();
 }
 
 export async function toggleQualityCheckbox(
@@ -180,7 +178,7 @@ export async function toggleQualityCheckbox(
     if (error) throw new Error(`toggleQualityCheckbox insert: ${error.message}`);
   }
 
-  revalidateAll();
+  revalidateDay();
 }
 
 export async function updateQualityTags(
@@ -219,5 +217,5 @@ export async function updateQualityTags(
     if (error) throw new Error(`updateQualityTags insert: ${error.message}`);
   }
 
-  revalidateAll();
+  revalidateDay();
 }
