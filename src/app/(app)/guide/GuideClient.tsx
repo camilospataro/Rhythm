@@ -286,7 +286,7 @@ export default function GuideClient() {
         </div>
 
         {/* Admin Entry */}
-        <div className="flex flex-col items-center pb-16 gap-2 mt-6">
+        <div className="flex flex-col items-center pb-28 gap-2 mt-6">
           {!showAdminInput ? (
             <button
               onClick={() => setShowAdminInput(true)}
