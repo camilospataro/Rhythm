@@ -206,9 +206,9 @@ export default function MonthClient({ monthName, year, month, dailySummary, temp
           const templateColor = isExplicit ? getTemplateColor(info!.assignedTemplateId) : undefined;
           const template = isExplicit ? templates.find((t) => t.id === info!.assignedTemplateId) : undefined;
 
-          // Build a subtle background from the template color (shift lightness to 93%)
+          // Build a subtle background using transparency (works in both light and dark mode)
           const weekBg = templateColor
-            ? templateColor.replace(/55%\)$/, "93%)")
+            ? templateColor.replace("hsl(", "hsla(").replace(")", ", 0.1)")
             : undefined;
 
           return (
