@@ -1,4 +1,6 @@
-import { createClient, getUserId } from "@/lib/supabase/server";
+import { createClient, getUserId, getImpersonatedUserId } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { isAdmin } from "@/lib/admin";
 import { NextResponse } from "next/server";
 
 const SYSTEM_PROMPT = `You are an assistant that converts user-provided files (routines, schedules, habit lists, etc.) into structured data for a habit-tracking app called Rhythm.
@@ -124,7 +126,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "AI returned invalid data. Please try again." });
     }
 
-    const supabase = await createClient();
+    // Use admin client when impersonating (RLS would block inserts for a different user_id)
+    const impersonating = await isAdmin() && await getImpersonatedUserId();
+    const supabase = impersonating ? createAdminClient() : await createClient();
     const errors: string[] = [];
     const taskIdMap = new Map<string, string>();
     let tasksCreated = 0;
