@@ -9,7 +9,7 @@ import Modal from "@/components/ui/Modal";
 import TaskForm from "@/components/tasks/TaskForm";
 import { createTask, deleteTask } from "@/actions/tasks";
 import { createTemplate } from "@/actions/templates";
-import { importWithAI } from "@/actions/import";
+
 import { TASK_TYPES, type TaskType } from "@/lib/constants";
 import type { Task, WeekTemplate } from "@/types/database";
 
@@ -221,7 +221,12 @@ export default function TaskListClient({ tasks, templates }: TaskListClientProps
                     setImportPending(true);
                     try {
                       const text = await importFile.text();
-                      const result = await importWithAI(text, importFile.name, importInstructions);
+                      const res = await fetch("/api/import", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ fileContent: text, fileName: importFile.name, instructions: importInstructions }),
+                      });
+                      const result = await res.json();
                       if (!result.success) {
                         setImportError(result.error || "Import failed");
                         return;
