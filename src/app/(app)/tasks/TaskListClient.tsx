@@ -222,6 +222,10 @@ export default function TaskListClient({ tasks, templates }: TaskListClientProps
                       try {
                         const text = await importFile.text();
                         const result = await importWithAI(text, importFile.name, importInstructions);
+                        if (!result.success) {
+                          setImportError(result.error || "Import failed");
+                          return;
+                        }
                         setImportResult(result);
                         if (result.tasksCreated > 0) {
                           setImportFile(null);

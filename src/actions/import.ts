@@ -59,9 +59,11 @@ Rules:
 - Output ONLY the JSON, no markdown fences or explanation`;
 
 interface ImportResult {
+  success: boolean;
   tasksCreated: number;
   templateCreated: string | null;
   errors: string[];
+  error?: string;
 }
 
 export async function importWithAI(
@@ -69,60 +71,69 @@ export async function importWithAI(
   fileName: string,
   instructions: string
 ): Promise<ImportResult> {
-  const userId = await getUserId();
-  if (!userId) throw new Error("Not authenticated");
-
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error("AI import is not configured. Set ANTHROPIC_API_KEY.");
-
-  const client = new Anthropic({ apiKey });
-
-  const userMessage = `File name: ${fileName}\n\nFile content:\n${fileContent}${instructions ? `\n\nAdditional instructions from the user:\n${instructions}` : ""}`;
-
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 4096,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: "user", content: userMessage }],
+  const fail = (msg: string): ImportResult => ({
+    success: false,
+    tasksCreated: 0,
+    templateCreated: null,
+    errors: [],
+    error: msg,
   });
 
-  const text = response.content
-    .filter((b): b is Anthropic.TextBlock => b.type === "text")
-    .map((b) => b.text)
-    .join("");
-
-  // Parse JSON — handle possible markdown fences
-  const jsonStr = text.replace(/^```json?\s*\n?/, "").replace(/\n?```\s*$/, "").trim();
-
-  let parsed: {
-    tasks: Array<{
-      name: string;
-      type: "checkbox" | "multi_quality";
-      color?: string;
-      rating_max?: number;
-      qualities?: Array<{
-        name: string;
-        type: "checkbox" | "rating";
-        rating_max?: number;
-        tags?: string[];
-      }>;
-    }>;
-    template?: {
-      name: string;
-      days: Record<string, string[]>;
-    };
-  };
-
   try {
-    parsed = JSON.parse(jsonStr);
-  } catch {
-    throw new Error("AI returned invalid data. Please try again.");
-  }
+    const userId = await getUserId();
+    if (!userId) return fail("Not authenticated");
 
-  const supabase = await createClient();
-  const errors: string[] = [];
-  const taskIdMap = new Map<string, string>();
-  let tasksCreated = 0;
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) return fail("AI import is not configured. Ask the admin to set ANTHROPIC_API_KEY.");
+
+    const client = new Anthropic({ apiKey });
+
+    const userMessage = `File name: ${fileName}\n\nFile content:\n${fileContent}${instructions ? `\n\nAdditional instructions from the user:\n${instructions}` : ""}`;
+
+    const response = await client.messages.create({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 4096,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: "user", content: userMessage }],
+    });
+
+    const text = response.content
+      .filter((b): b is Anthropic.TextBlock => b.type === "text")
+      .map((b) => b.text)
+      .join("");
+
+    // Parse JSON — handle possible markdown fences
+    const jsonStr = text.replace(/^```json?\s*\n?/, "").replace(/\n?```\s*$/, "").trim();
+
+    let parsed: {
+      tasks: Array<{
+        name: string;
+        type: "checkbox" | "multi_quality";
+        color?: string;
+        rating_max?: number;
+        qualities?: Array<{
+          name: string;
+          type: "checkbox" | "rating";
+          rating_max?: number;
+          tags?: string[];
+        }>;
+      }>;
+      template?: {
+        name: string;
+        days: Record<string, string[]>;
+      };
+    };
+
+    try {
+      parsed = JSON.parse(jsonStr);
+    } catch {
+      return fail("AI returned invalid data. Please try again.");
+    }
+
+    const supabase = await createClient();
+    const errors: string[] = [];
+    const taskIdMap = new Map<string, string>();
+    let tasksCreated = 0;
 
   // Create tasks
   for (const task of parsed.tasks) {
@@ -235,9 +246,18 @@ export async function importWithAI(
     }
   }
 
-  revalidatePath("/tasks");
-  revalidatePath("/day");
-  revalidatePath("/week");
+    revalidatePath("/tasks");
+    revalidatePath("/day");
+    revalidatePath("/week");
 
-  return { tasksCreated, templateCreated, errors };
+    return { success: true, tasksCreated, templateCreated, errors };
+  } catch (err) {
+    return {
+      success: false,
+      tasksCreated: 0,
+      templateCreated: null,
+      errors: [],
+      error: err instanceof Error ? err.message : "Import failed unexpectedly",
+    };
+  }
 }
