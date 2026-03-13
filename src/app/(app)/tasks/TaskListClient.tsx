@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useTransition } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
@@ -29,7 +29,7 @@ export default function TaskListClient({ tasks, templates }: TaskListClientProps
   const [showImport, setShowImport] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importInstructions, setImportInstructions] = useState("");
-  const [importPending, startImportTransition] = useTransition();
+  const [importPending, setImportPending] = useState(false);
   const [importResult, setImportResult] = useState<{ tasksCreated: number; templateCreated: string | null; errors: string[] } | null>(null);
   const [importError, setImportError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -214,28 +214,30 @@ export default function TaskListClient({ tasks, templates }: TaskListClientProps
                   size="sm"
                   className="flex-1"
                   disabled={!importFile || importPending}
-                  onClick={() => {
+                  onClick={async () => {
                     if (!importFile) return;
                     setImportError("");
                     setImportResult(null);
-                    startImportTransition(async () => {
-                      try {
-                        const text = await importFile.text();
-                        const result = await importWithAI(text, importFile.name, importInstructions);
-                        if (!result.success) {
-                          setImportError(result.error || "Import failed");
-                          return;
-                        }
-                        setImportResult(result);
-                        if (result.tasksCreated > 0) {
-                          setImportFile(null);
-                          setImportInstructions("");
-                          if (fileInputRef.current) fileInputRef.current.value = "";
-                        }
-                      } catch (err) {
-                        setImportError(err instanceof Error ? err.message : "Import failed");
+                    setImportPending(true);
+                    try {
+                      const text = await importFile.text();
+                      const result = await importWithAI(text, importFile.name, importInstructions);
+                      if (!result.success) {
+                        setImportError(result.error || "Import failed");
+                        return;
                       }
-                    });
+                      setImportResult(result);
+                      if (result.tasksCreated > 0) {
+                        setImportFile(null);
+                        setImportInstructions("");
+                        if (fileInputRef.current) fileInputRef.current.value = "";
+                        router.refresh();
+                      }
+                    } catch (err) {
+                      setImportError(err instanceof Error ? err.message : "Import failed");
+                    } finally {
+                      setImportPending(false);
+                    }
                   }}
                 >
                   {importPending ? "Importing..." : "Import"}
