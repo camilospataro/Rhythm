@@ -1,6 +1,5 @@
 "use server";
 
-import Anthropic from "@anthropic-ai/sdk";
 import { createClient, getUserId } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -84,23 +83,38 @@ export async function importWithAI(
     if (!userId) return fail("Not authenticated");
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return fail("AI import is not configured. Ask the admin to set ANTHROPIC_API_KEY.");
-
-    const client = new Anthropic({ apiKey });
+    if (!apiKey) return fail("AI import is not configured. Set ANTHROPIC_API_KEY in environment variables.");
 
     const userMessage = `File name: ${fileName}\n\nFile content:\n${fileContent}${instructions ? `\n\nAdditional instructions from the user:\n${instructions}` : ""}`;
 
-    const response = await client.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 4096,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: userMessage }],
+    // Call Anthropic API directly via fetch (no SDK needed)
+    const apiResponse = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 4096,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: "user", content: userMessage }],
+      }),
     });
 
-    const text = response.content
-      .filter((b): b is Anthropic.TextBlock => b.type === "text")
-      .map((b) => b.text)
+    if (!apiResponse.ok) {
+      const errBody = await apiResponse.text();
+      return fail(`AI API error (${apiResponse.status}): ${errBody.slice(0, 200)}`);
+    }
+
+    const apiData = await apiResponse.json();
+    const text = (apiData.content || [])
+      .filter((b: { type: string }) => b.type === "text")
+      .map((b: { text: string }) => b.text)
       .join("");
+
+    if (!text) return fail("AI returned empty response. Please try again.");
 
     // Parse JSON — handle possible markdown fences
     const jsonStr = text.replace(/^```json?\s*\n?/, "").replace(/\n?```\s*$/, "").trim();
@@ -135,116 +149,116 @@ export async function importWithAI(
     const taskIdMap = new Map<string, string>();
     let tasksCreated = 0;
 
-  // Create tasks
-  for (const task of parsed.tasks) {
-    try {
-      const { data: created, error } = await supabase
-        .from("tasks")
-        .insert({
-          user_id: userId,
-          name: task.name,
-          type: task.type,
-          color: task.color || null,
-          rating_min: 0,
-          rating_max: task.type === "multi_quality" ? (task.rating_max || 5) : 0,
-          sort_order: tasksCreated,
-          archived: false,
-        })
-        .select()
-        .single();
+    // Create tasks
+    for (const task of parsed.tasks) {
+      try {
+        const { data: created, error } = await supabase
+          .from("tasks")
+          .insert({
+            user_id: userId,
+            name: task.name,
+            type: task.type,
+            color: task.color || null,
+            rating_min: 0,
+            rating_max: task.type === "multi_quality" ? (task.rating_max || 5) : 0,
+            sort_order: tasksCreated,
+            archived: false,
+          })
+          .select()
+          .single();
 
-      if (error) {
-        errors.push(`Failed to create task "${task.name}": ${error.message}`);
-        continue;
-      }
-
-      taskIdMap.set(task.name, created.id);
-      tasksCreated++;
-
-      // Create qualities
-      if (task.qualities && task.qualities.length > 0) {
-        for (let i = 0; i < task.qualities.length; i++) {
-          const q = task.qualities[i];
-          const { error: qError } = await supabase
-            .from("task_qualities")
-            .insert({
-              task_id: created.id,
-              user_id: userId,
-              name: q.name,
-              type: q.type || "checkbox",
-              rating_max: q.rating_max || 5,
-              tags: q.tags || [],
-              sort_order: i,
-            });
-          if (qError) {
-            errors.push(`Failed to create quality "${q.name}" for "${task.name}": ${qError.message}`);
-          }
+        if (error) {
+          errors.push(`Failed to create task "${task.name}": ${error.message}`);
+          continue;
         }
-      }
-    } catch (err) {
-      errors.push(`Error creating "${task.name}": ${err instanceof Error ? err.message : "Unknown error"}`);
-    }
-  }
 
-  // Create template
-  let templateCreated: string | null = null;
-  if (parsed.template && tasksCreated > 0) {
-    try {
-      const { data: template, error } = await supabase
-        .from("week_templates")
-        .insert({
-          user_id: userId,
-          name: parsed.template.name || "Imported Template",
-          is_default: false,
-        })
-        .select()
-        .single();
+        taskIdMap.set(task.name, created.id);
+        tasksCreated++;
 
-      if (error) {
-        errors.push(`Failed to create template: ${error.message}`);
-      } else {
-        templateCreated = template.name;
-
-        // Assign tasks to days
-        const dayInserts: Array<{
-          template_id: string;
-          task_id: string;
-          user_id: string;
-          day_of_week: number;
-          sort_order: number;
-        }> = [];
-
-        for (const [dayStr, taskNames] of Object.entries(parsed.template.days)) {
-          const dayNum = parseInt(dayStr, 10);
-          if (isNaN(dayNum) || dayNum < 0 || dayNum > 6) continue;
-
-          for (let i = 0; i < taskNames.length; i++) {
-            const taskId = taskIdMap.get(taskNames[i]);
-            if (taskId) {
-              dayInserts.push({
-                template_id: template.id,
-                task_id: taskId,
+        // Create qualities
+        if (task.qualities && task.qualities.length > 0) {
+          for (let i = 0; i < task.qualities.length; i++) {
+            const q = task.qualities[i];
+            const { error: qError } = await supabase
+              .from("task_qualities")
+              .insert({
+                task_id: created.id,
                 user_id: userId,
-                day_of_week: dayNum,
+                name: q.name,
+                type: q.type || "checkbox",
+                rating_max: q.rating_max || 5,
+                tags: q.tags || [],
                 sort_order: i,
               });
+            if (qError) {
+              errors.push(`Failed to create quality "${q.name}" for "${task.name}": ${qError.message}`);
             }
           }
         }
+      } catch (err) {
+        errors.push(`Error creating "${task.name}": ${err instanceof Error ? err.message : "Unknown error"}`);
+      }
+    }
 
-        if (dayInserts.length > 0) {
-          const { error: dayError } = await supabase
-            .from("template_day_tasks")
-            .insert(dayInserts);
-          if (dayError) {
-            errors.push(`Failed to assign tasks to template days: ${dayError.message}`);
+    // Create template
+    let templateCreated: string | null = null;
+    if (parsed.template && tasksCreated > 0) {
+      try {
+        const { data: template, error } = await supabase
+          .from("week_templates")
+          .insert({
+            user_id: userId,
+            name: parsed.template.name || "Imported Template",
+            is_default: false,
+          })
+          .select()
+          .single();
+
+        if (error) {
+          errors.push(`Failed to create template: ${error.message}`);
+        } else {
+          templateCreated = template.name;
+
+          // Assign tasks to days
+          const dayInserts: Array<{
+            template_id: string;
+            task_id: string;
+            user_id: string;
+            day_of_week: number;
+            sort_order: number;
+          }> = [];
+
+          for (const [dayStr, taskNames] of Object.entries(parsed.template.days)) {
+            const dayNum = parseInt(dayStr, 10);
+            if (isNaN(dayNum) || dayNum < 0 || dayNum > 6) continue;
+
+            for (let i = 0; i < taskNames.length; i++) {
+              const taskId = taskIdMap.get(taskNames[i]);
+              if (taskId) {
+                dayInserts.push({
+                  template_id: template.id,
+                  task_id: taskId,
+                  user_id: userId,
+                  day_of_week: dayNum,
+                  sort_order: i,
+                });
+              }
+            }
+          }
+
+          if (dayInserts.length > 0) {
+            const { error: dayError } = await supabase
+              .from("template_day_tasks")
+              .insert(dayInserts);
+            if (dayError) {
+              errors.push(`Failed to assign tasks to template days: ${dayError.message}`);
+            }
           }
         }
+      } catch (err) {
+        errors.push(`Error creating template: ${err instanceof Error ? err.message : "Unknown error"}`);
       }
-    } catch (err) {
-      errors.push(`Error creating template: ${err instanceof Error ? err.message : "Unknown error"}`);
     }
-  }
 
     revalidatePath("/tasks");
     revalidatePath("/day");
